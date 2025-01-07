@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from librosa import load
-from librosa.feature import melspectrogram
+from librosa.feature import mfcc
 from numpy import savetxt, random, mean, cov, moveaxis, dtypes
 from pathlib import Path
 from tensorflow import lite
@@ -29,7 +29,7 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
     audio = load(file, mono=False)
     audioData = audio[0]
 
-    mel = melspectrogram(
+    mel = mfcc(
         y=audioData,
         n_mels=96,
         hop_length=512,

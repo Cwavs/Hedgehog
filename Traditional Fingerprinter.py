@@ -20,14 +20,14 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
     audio = load(file)
     audioData = audio[0]
 
-    melfcc = mfcc(
+    mel = mfcc(
         y=audioData,
         n_mfcc=4,
         hop_length=512,
         win_length=1024
     )
 
-    normal = rng.multivariate_normal(mean(melfcc, axis=1), cov(melfcc), size=(4, 4))
+    normal = rng.multivariate_normal(mean(mel, axis=1), cov(mel), size=(4, 4))
 
     savetxt(
         str(file.with_suffix(".csv")) if not args.csvDir else f"{args.csvDir / (file.name.rsplit('.', 1)[0])}.csv",
