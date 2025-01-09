@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-from librosa import load
-from librosa.feature import mfcc
-from numpy import savetxt, random, mean, cov, moveaxis, dtypes
+from librosa import load, power_to_db
+from librosa.feature import melspectrogram
+from numpy import savetxt, amax, stack
 from pathlib import Path
 from tensorflow import lite
 
@@ -20,10 +20,6 @@ args = parser.parse_args()
 #Setup and load Tensorflow model
 interpreter = lite.Interpreter(model_path=args.model)
 
-#Resize the input array to take a stereo file
-interpreter.resize_tensor_input(0, (2, 187, 96))
-interpreter.allocate_tensors()
-
 #Get input and output details
 inputDetails = interpreter.get_input_details()[0]
 outputDetails = interpreter.get_output_details()[0]
@@ -35,37 +31,51 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
     print(file)
 
     #Load audio file in stereo
-    audioData = load(file, mono=False)[0]
+    audioData, sr = load(file, mono=True, sr=16000)
 
     #Obtain the mfcc for the audio data
-    mel = mfcc(
+    mel = melspectrogram(
         y=audioData,
+        sr=sr,
         #I chose 96 mels because it seemed like the more likely of the two axes of the input array to be used for this, could be wrong, but it seems to work
-        n_mfcc=96,
+        n_mels=96,
         #I borrowed the hop length and window length from Musly, again could be wrong, but it seems to work, thanks Musly
-        hop_length=512,
-        win_length=1024
+        hop_length=160,
+        win_length=400,
+        n_fft=400
     )
 
-    #Calculate the multivariate normal of the mfcc
-    normal = moveaxis(
-        random.default_rng().multivariate_normal(
-            #Calculate the mean value of the audio data
-            mean(mel, axis=1),
-            #Calculate the covariances of the audio data
-            cov(mel), 
-            size=(187, 96)
-        ).astype(dtypes.Float32DType), [1, 2], [-1, 0]
-    )
+    mel = power_to_db(mel, ref=amax).T
+
+    print(mel.shape)
+
+    segs = []
+    start = 0
+    while start+187 <= mel.shape[0]:
+        segs.append(mel[start:start+187, :])
+        start += 187
+    
+    segs = stack(segs, axis=0)
+
+    #Resize the input array to take a stereo file
+    interpreter.resize_tensor_input(0, segs.shape)
+    interpreter.allocate_tensors()
 
     #Input the result into the model
-    interpreter.set_tensor(inputDetails['index'], normal)
+    interpreter.set_tensor(inputDetails['index'], segs)
 
     #Actually run the model
     interpreter.invoke()
 
     #Get the output data from the model
     outputData = interpreter.get_tensor(outputDetails['index'])
+
+    print(outputData.shape)
+
+    outputData = outputData.mean(axis=0)
+
+    print(outputData.shape)
+    print(outputData)
 
     #Reshape the data into a 1-D array and save it to a csv
     savetxt(
