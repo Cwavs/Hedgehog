@@ -58,7 +58,6 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
     else:
         segs.append(mel)
     
-    print(len(segs))
     if(len(segs) != 1):
         segs = stack(segs, axis=0)
     else:
