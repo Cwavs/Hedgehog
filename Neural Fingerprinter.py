@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from librosa import load, power_to_db
 from librosa.feature import melspectrogram
-from numpy import savetxt, amax, stack
+from numpy import savetxt, amax, stack, newaxis
 from pathlib import Path
 from tensorflow import lite
 
@@ -51,11 +51,18 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
 
     segs = []
     start = 0
-    while start+187 <= mel.shape[0]:
-        segs.append(mel[start:start+187, :])
-        start += 187
+    if mel.shape[0] > 187:
+        while start+187 <= mel.shape[0]:
+            segs.append(mel[start:start+187, :])
+            start += 187
+    else:
+        segs.append(mel)
     
-    segs = stack(segs, axis=0)
+    print(len(segs))
+    if(len(segs) != 1):
+        segs = stack(segs, axis=0)
+    else:
+        segs = segs[0][newaxis, ...]
 
     #Resize the input array to take a stereo file
     interpreter.resize_tensor_input(0, segs.shape)
