@@ -1,7 +1,7 @@
 # Hedgehog
 ## Very WIP Code is not clean and probably needs alot of improvement.
 
-A (bad) attempt at reverse engineering/re-creating (Plex's Sonic Analysis)[https://www.plex.tv/en-gb/blog/super-sonic-get-closer-to-your-music-in-plexamp/] features in an open way.
+A (bad) attempt at reverse engineering/re-creating [Plex's Sonic Analysis](https://www.plex.tv/en-gb/blog/super-sonic-get-closer-to-your-music-in-plexamp/) features in an open way.
 
 ## Requirements
 
