@@ -10,7 +10,7 @@ Hedgehog utilises a couple of python modules which can be obtained with pip:
 pip install librosa numpy tensorflow voyager
 ```
 
-Tensorflow is technically optional as there is a more traditional fingerprinter that works without the neural model, however this is not the focus of the project.
+Tensorflow is technically optional as there is a more traditional fingerprinter that works without the neural model I made for testing, however this is not the focus of the project.
 
 The neural fingerprinter currently relies on Plex's Sonic Analysis model as well. We can't provide that so you'll have to find your own copy somewhere.
 
@@ -33,8 +33,8 @@ python searcher.py /home/cwavs/csvdir /home/cwavs/csvdir/song.csv
 ## TODO
 
 - [ ] Allow users to select the amount of neighbours chosen.
-- [ ] Investigate possible improvements to the neural fingerprinter with better pre-processing.
-- [ ] Generally clean up the code, and maybe consider converting it into an actual module rather than scripts.
+- [x] Investigate possible improvements to the neural fingerprinter with better pre-processing.
+- [ ] Generally clean up the code, and maybe consider converting it into an actual module or library rather than scripts.
 
 ## Contributing
 
