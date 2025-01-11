@@ -18,7 +18,7 @@ parser.add_argument("-f", "--format", help="File extension/format of the audio f
 args = parser.parse_args()
 
 #Setup and load Tensorflow model.
-interpreter = lite.Interpreter(model_path=args.model)
+interpreter = lite.Interpreter(model_path=args.model.as_posix())
 
 #Get input and output details
 inputDetails = interpreter.get_input_details()[0]
