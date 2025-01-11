@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-import numpy as np
+from numpy import loadtxt
 from voyager import Index, Space
 from pathlib import Path
 
@@ -15,11 +15,11 @@ index = Index(Space.Euclidean, num_dimensions=50, ef_construction=5000)
 names = list()
 
 for file in args.csvDir.rglob("*.csv"): 
-    single = np.loadtxt(file, delimiter=",")
+    single = loadtxt(file, delimiter=",")
     names.append(file.name)
     index.add_item(single, id=len(names)-1)
 
-single = np.loadtxt(args.fingerprint, delimiter=",")
+single = loadtxt(args.fingerprint, delimiter=",")
 
 songs, dists = index.query(single, k=args.numNeighbours, query_ef=5000)
 
