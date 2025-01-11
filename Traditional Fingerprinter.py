@@ -31,6 +31,6 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
 
     savetxt(
         str(file.with_suffix(".csv")) if not args.csvDir else f"{args.csvDir / (file.name.rsplit('.', 1)[0])}.csv",
-        normal.reshape((64)),
+        normal.reshape(-1),
         delimiter=","
     )
