@@ -25,14 +25,14 @@ The fingerprinter analyses the music and saves the data to a series of CSV files
 The below command would fingerprint all mp3 files in /home/cwavs/music with the neural fingerprinter using Music.tflite as the model. It would save the csv files /home/cwavs/csvdir
 
 ```bash
-python neuralFingerprinter.py /home/cwavs/music -c /home/cwavs/csvdir -m Music.tflite -f mp3
+python Neural Fingerprinter.py /home/cwavs/music -c /home/cwavs/csvdir -m Music.tflite -f mp3
 ```
 
 The searcher then loads the CSV data and uses voyager to index them. It can then use any of the CSV files to find the 10 closest songs to them, each representing a song. You can select the number of neighbours with -k
 The below command would print 100 neighbours to song.csv
 
 ```bash
-python searcher.py /home/cwavs/csvdir /home/cwavs/csvdir/song.csv -k 100
+python Searcher.py /home/cwavs/csvdir /home/cwavs/csvdir/song.csv -k 100
 ```
 
 ## TODO
