@@ -8,7 +8,7 @@ parser = ArgumentParser(prog="Hedgehog", description="Fingerprints audio tracks.
 
 parser.add_argument('audioDir', help="Root directory of music library.", type=Path)
 parser.add_argument('-c', '--csvDir', help="Directory to save the csv files to.", type=Path, default=None)
-parser.add_argument("-f", "--format", help="File extension/format of the audio files to read.",type=str, default="flac")
+parser.add_argument("-f", "--format", help="File extension/format of the audio files to read.", type=str, default="flac")
 
 args = parser.parse_args()
 

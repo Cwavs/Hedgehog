@@ -11,8 +11,8 @@ parser = ArgumentParser(prog="Hedgehog Neural", description="Uses AI to analyse 
 #Set up arugments to be parsed
 parser.add_argument('audioDir', help="Root directory of music library.", type=Path)
 parser.add_argument('-c', '--csvDir', help="Directory to save the csv files to.", type=Path, default=None)
-parser.add_argument("-m", "--model", help="Path to model file.", default="./Music.tflite")
-parser.add_argument("-f", "--format", help="File extension/format of the audio files to read.", default="flac")
+parser.add_argument("-m", "--model", help="Path to model file.", default="./Music.tflite", type=Path)
+parser.add_argument("-f", "--format", help="File extension/format of the audio files to read.", type=str, default="flac")
 
 #Parse args
 args = parser.parse_args()

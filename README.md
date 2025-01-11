@@ -32,7 +32,7 @@ python searcher.py /home/cwavs/csvdir /home/cwavs/csvdir/song.csv
 
 ## TODO
 
-- [ ] Allow users to select the amount of neighbours chosen.
+- [X] Allow users to select the amount of neighbours chosen.
 - [x] Investigate possible improvements to the neural fingerprinter with better pre-processing.
 - [ ] Generally clean up the code, and maybe consider converting it into an actual module or library rather than scripts.
 
