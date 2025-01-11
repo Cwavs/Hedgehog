@@ -1,5 +1,5 @@
 # Hedgehog
-##Very WIP Code is not clean and probably needs alot of improvement.
+## Very WIP Code is not clean and probably needs alot of improvement.
 
 A (bad) attempt at reverse engineering/re-creating Plex's Sonic Analysis features in an open way.
 
