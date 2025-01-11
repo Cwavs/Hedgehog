@@ -8,10 +8,10 @@ A (bad) attempt at reverse engineering/re-creating Plex's Sonic Analysis feature
 Hedgehog utilises a couple of python modules which can be obtained with pip:
 
 ```bash
-pip install librosa numpy tensorflow voyager
+pip install -r requirements.txt
 ```
 
-Tensorflow is technically optional as there is a more traditional fingerprinter that works without the neural model I made for testing, however this is not the focus of the project.
+Tensorflow is not needed for traditional fingerprinter, as that works without the neural model. I it made for testing however, so this is not the focus of the project.
 
 The neural fingerprinter currently relies on Plex's Sonic Analysis model as well. We can't provide that so you'll have to find your own copy somewhere.
 
@@ -20,21 +20,23 @@ The neural fingerprinter currently relies on Plex's Sonic Analysis model as well
 The project is currently split into two scripts which need to be run individually, the fingerprinter and the searcher.
 
 The fingerprinter analyses the music and saves the data to a series of CSV files in a directory of your choice (placed next to the media by default).
+The below command would fingerprint all mp3 files in /home/cwavs/music with the neural fingerprinter using Music.tflite as the model. It would save the csv files /home/cwavs/csvdir
 
 ```bash
 python neuralFingerprinter.py /home/cwavs/music -c /home/cwavs/csvdir -m Music.tflite -f mp3
 ```
 
-The searcher then loads the CSV data and uses voyager to index them. It can then use any of the CSV files to find the 10 closest songs to them, each representing a song. It's currently fixed at 10 songs.
+The searcher then loads the CSV data and uses voyager to index them. It can then use any of the CSV files to find the 10 closest songs to them, each representing a song. You can select the number of neighbours with -k
+The below command would print 100 neighbours to song.csv
 
 ```bash
-python searcher.py /home/cwavs/csvdir /home/cwavs/csvdir/song.csv
+python searcher.py /home/cwavs/csvdir /home/cwavs/csvdir/song.csv -k 100
 ```
 
 ## TODO
 
 - [X] Allow users to select the amount of neighbours chosen.
-- [x] Investigate possible improvements to the neural fingerprinter with better pre-processing.
+- [X] Investigate possible improvements to the neural fingerprinter with better pre-processing.
 - [ ] Generally clean up the code, and maybe consider converting it into an actual module or library rather than scripts.
 
 ## Contributing
