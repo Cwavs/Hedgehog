@@ -10,17 +10,17 @@ parser.add_argument('fingerprint', help="The CSV Fingerprint for a single song."
 
 args = parser.parse_args()
 
-index = Index(Space.Euclidean, num_dimensions=100)
-name = list()
+index = Index(Space.Euclidean, num_dimensions=50, ef_construction=5000)
+names = list()
 
 for file in args.csvDir.rglob("*.csv"): 
     single = np.loadtxt(file, delimiter=",")
-    name.append(file.name)
-    index.add_item(single, id=len(name)-1)
+    names.append(file.name)
+    index.add_item(single, id=len(names)-1)
 
 single = np.loadtxt(args.fingerprint, delimiter=",")
 
-songs = index.query(single, k=10)
+songs, dists = index.query(single, k=10, query_ef=5000)
 
-for song in songs[0]:
-    print(name[song])
+for i, song in enumerate(songs):
+    print(names[song] + " is " + str(dists[i]) + " away from the input.")
