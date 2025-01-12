@@ -1,5 +1,5 @@
 from numpy import ndarray 
-from preprocessor import _preprocessor
+from preprocessors import _preprocessor
 from pathlib import Path
 from tensorflow import lite
 
@@ -13,13 +13,13 @@ class _fingerprinter:
         return self.Preprocess(self)
 
     def Preprocess(self) -> ndarray:
-        return self.preprocessor.Invoke()
+        return self.preprocessor.Invoke(self.audio)
     
 class neuralFingerprinter(_fingerprinter):
     
     def __init__(self, preprocessor: _preprocessor, audio: ndarray, model: Path) -> None:
-        super().__init__(self, preprocessor, audio)
-        self.model = model
+        super().__init__(preprocessor, audio)
+        self.model = Path(model)
 
     def Invoke(self) -> ndarray:
 

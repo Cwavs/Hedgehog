@@ -13,7 +13,7 @@ class _preprocessor():
 class neuralPreProcessor(_preprocessor):
 
     def __init__(self, sr: int, features: int, winLength: int, hopLength: int, segmentLength: int) -> None:
-        super.__init__(self, sr)
+        super().__init__(sr)
         self.features = features
         self.winLength = winLength
         self.hopLength = hopLength
