@@ -1,7 +1,6 @@
-from numpy import ndarray 
+from numpy import ndarray
 from preprocessors import _preprocessor
 from pathlib import Path
-from tensorflow import lite
 
 class _fingerprinter:
 
@@ -22,6 +21,7 @@ class neuralFingerprinter(_fingerprinter):
         self.model = Path(model)
 
     def Invoke(self) -> ndarray:
+        from tensorflow import lite
 
         #Setup and load Tensorflow model.
         _interpreter = lite.Interpreter(model_path=self.model.as_posix())
@@ -47,3 +47,10 @@ class neuralFingerprinter(_fingerprinter):
 
         #Because we've passed n segements in an early step, the output will be (n,50), as such we have to take the mean of the array to get the average fingerprint of the song.
         return outputData.mean(axis=0)
+    
+class traditionalFingerprinter(_fingerprinter):
+    def __init__(self, preprocessor: _preprocessor, audio: ndarray) -> None:
+        super().__init__(preprocessor, audio)
+    
+    def Invoke(self) -> ndarray:
+        return self.Preprocess().reshape(-1)
