@@ -26,7 +26,7 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
 
     #Check if a csv file already exists. If it does we skip it rather than regenerating it.
     #This is hacky and looks super fucking cursed. It works but I sure hope someone else comes along with a better way.
-    if Path((str(file).rsplit('.', 1)[0]) + ".csv").is_file() == False:
+    if Path(str(file.with_suffix(".csv")) if not args.csvDir else f"{args.csvDir / (file.name.rsplit('.', 1)[0])}.csv").is_file() == False:
 
         #Load up the audio file.
         audioData = load(file)[0]
