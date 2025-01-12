@@ -37,7 +37,7 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
         #Load audio file in mono at 16khz.
         audioData, sr = load(file, mono=True, sr=16000)
 
-        #Obtain the melspectrogram for the audio data.
+        #Obtain the melspectrogram for the audio data and transpose it.
         mel = melspectrogram(
             #Data to be spectrogrammed.
             y=audioData,
@@ -49,10 +49,7 @@ for file in args.audioDir.rglob(f"*.{args.format}"):
             hop_length=160,
             win_length=400,
             n_fft=400
-        )
-
-        #Switch from power to decibels, and grab the transposed version so that the dimensions align with those used in the model's input shape.
-        mel = power_to_db(mel, ref=amax).T
+        ).T
 
         #Here we split up the mel spectrogram into slice/segments of 187 samples.
         segs = []
