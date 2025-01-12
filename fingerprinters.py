@@ -1,4 +1,4 @@
-from numpy import ndarray
+from numpy import ndarray 
 from preprocessor import _preprocessor
 from pathlib import Path
 from tensorflow import lite
@@ -13,11 +13,11 @@ class _fingerprinter:
         return self.Preprocess(self)
 
     def Preprocess(self) -> ndarray:
-        return self.preprocessor(self.audio)
+        return self.preprocessor.Invoke()
     
 class neuralFingerprinter(_fingerprinter):
     
-    def __init__(self, preprocessor: _preprocessor, audio: ndarray, model: Path):
+    def __init__(self, preprocessor: _preprocessor, audio: ndarray, model: Path) -> None:
         super().__init__(self, preprocessor, audio)
         self.model = model
 
@@ -37,7 +37,7 @@ class neuralFingerprinter(_fingerprinter):
         _interpreter.allocate_tensors()
 
         #Input the result into the model.
-        _interpreter.set_tensor(inputDetails['index'], segs)
+        _interpreter.set_tensor(inputDetails['index'], _preprocessed)
 
         #Actually run the model.
         _interpreter.invoke()
@@ -46,4 +46,4 @@ class neuralFingerprinter(_fingerprinter):
         outputData = _interpreter.get_tensor(outputDetails['index'])
 
         #Because we've passed n segements in an early step, the output will be (n,50), as such we have to take the mean of the array to get the average fingerprint of the song.
-        outputData = outputData.mean(axis=0)
+        return outputData.mean(axis=0)
