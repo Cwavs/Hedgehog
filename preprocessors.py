@@ -1,36 +1,52 @@
 from numpy import ndarray
 
+#Create a base preprocessor class.
 class _preprocessor():
-
+    
+    #Set creation parameters.
     def __init__(self, sr: int) -> None:
+        #Store values.
         self.sr = sr
     
-    def Invoke(self, audio: ndarray):
+    #Define an invocation function to be overridden later.
+    def Invoke(self, audio: ndarray) -> ndarray:
+        #Because this is the base preprocessor that isn't meant to be used. I'm just returning the audio raw here.
         return audio
 
+#Create the neural pre processor class as an overide of the base class.
 class neuralPreProcessor(_preprocessor):
 
+    #Set creation parameters. Including the defaults derived from corresponding values used in the original script.
     def __init__(self, sr: int, features: int = 96, winLength: int = 400, hopLength: int = 160, segmentLength: int = 187) -> None:
+        #Call the parent's init to store it's values itself.
         super().__init__(sr)
+        #Store the rest of the values.
         self.features = features
         self.winLength = winLength
         self.hopLength = hopLength
         self.segmentLength = segmentLength
 
+    #Define our own invocation function.
     def Invoke(self, audio: ndarray) -> ndarray:
+        #Import some libs needed for processing.
         from librosa.feature import melspectrogram
-        from librosa import power_to_db
-        from numpy import amax, stack, newaxis
+        from numpy import stack, newaxis
 
+        #Generate a melspectrogram and transpose it using a combination of the parameters provided from the parent class and the parameters of this function.
         _mel = melspectrogram(
+            #Data to be spectrogrammed.
             y=audio,
+            #Samplerate of the provided audio data.
             sr=self.sr,
+            #We use the features parameter to define the number of frequency bins to extract.
             n_mels=self.features,
+            #Fairly obvious, we set the hopLength and winLength to their respective parameters, and match n_fft with winLength.
             hop_length=self.hopLength,
             win_length=self.winLength,
             n_fft=self.winLength
         ).T
 
+        #Here we split up the mel spectrogram into slice/segments as per the provided segmentLength.
         _segments = []
         start = 0
         #We do this by first checking if there are enough samples to have more than one.
@@ -49,24 +65,31 @@ class neuralPreProcessor(_preprocessor):
         else:
             _segments = _segments[0][newaxis, ...]
 
+        #We then return these segments to be processed by the model.
         return _segments
 
+#Create the traditional pre processor class as an overide of the base class.
 class traditionalPreProcessor(_preprocessor):
+    #Set creation parameters. Including the defaults derived from corresponding values used in the original script.
     def __init__(self, sr: int, features: int = 4, winLength: int = 1024, hopLength: int = 512) -> None:
+        #Call the parent's init to store it's values itself.
         super().__init__(sr)
+        #Store the rest of the values.
         self.features = features
         self.winLenth = winLength
         self.hopLength = hopLength
 
+    #Define our own invocation function.
     def Invoke(self, audio: ndarray) -> ndarray:
+        #Import some libs needed for processing.
         from librosa.feature import mfcc
         from numpy import random, mean, cov
 
         #Obtain the mfccs for the audio data.
         mel = mfcc(
-            #Data to use
+            #Data to use.
             y=audio,
-            #Number of mfccs to generate (aka features to extract)
+            #Number of mfccs to generate (aka features to extract).
             n_mfcc=self.features,
             #I got these values from Musly. Thanks Musly.
             hop_length=self.hopLength,
