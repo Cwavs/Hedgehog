@@ -29,9 +29,7 @@ class neuralPreProcessor(_preprocessor):
             hop_length=self.hopLength,
             win_length=self.winLength,
             n_fft=self.winLength
-        )
-
-        _mel = power_to_db(_mel, ref=amax).T
+        ).T
 
         _segments = []
         start = 0
@@ -53,7 +51,7 @@ class neuralPreProcessor(_preprocessor):
 
         return _segments
 
-class traditionalPreProcess(_preprocessor):
+class traditionalPreProcessor(_preprocessor):
     def __init__(self, sr: int, features: int = 4, winLength: int = 1024, hopLength: int = 512) -> None:
         super().__init__(sr)
         self.features = features
