@@ -21,13 +21,14 @@ class _fingerprinter:
         #Here I'm just calling and returning the result of the preprocessor. I can't really think of a reason I'd need to process this more here, so I'm just going to inherit this in the following classes.
         return self.preprocessor.Invoke(self.audio)
 
-#Create the neural fingerprinter class as an overide of the base class.
+#Create the neural fingerprinter class as an overide of the base fingerprinter class.
 class neuralFingerprinter(_fingerprinter):
     
     #Set creation parameters. We add an aditional model parameter here so that we can accept a tflite model of out choosing.
     def __init__(self, preprocessor: _preprocessor, audio: ndarray, model: Path) -> None:
         #Call the parent's init to store it's values itself.
         super().__init__(preprocessor, audio)
+
         #Store the rest of the values.
         self.model = Path(model)
 
@@ -62,7 +63,7 @@ class neuralFingerprinter(_fingerprinter):
         #Because we've passed n segements in an early step, the output will be (n,50), as such we have to take the mean of the array to get the average fingerprint of the song.
         return outputData.mean(axis=0)
 
-#Create the traditional fingerprinter class as an overide of the base class.
+#Create the traditional fingerprinter class as an overide of the base fingerprinter class.
 class traditionalFingerprinter(_fingerprinter):
 
     #Set creation parameters.

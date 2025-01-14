@@ -4,25 +4,28 @@ from numpy import ndarray
 class _preprocessor():
     
     #Set creation parameters.
-    def __init__(self, sr: int) -> None:
+    def __init__(self, sampleRate: int) -> None:
         #Store values.
-        self.sr = sr
+        self.sampleRate = sampleRate
     
     #Define an invocation function to be overridden later.
     def Invoke(self, audio: ndarray) -> ndarray:
+
         #Because this is the base preprocessor that isn't meant to be used. I'm just returning the audio raw here.
         return audio
 
-#Create the neural pre processor class as an overide of the base class.
+#Create the neural pre processor class as an overide of the base preprocessor class.
 class neuralPreProcessor(_preprocessor):
 
     #Set creation parameters. Including the defaults derived from corresponding values used in the original script.
-    def __init__(self, sr: int, features: int = 96, winLength: int = 400, hopLength: int = 160, segmentLength: int = 187) -> None:
+    def __init__(self, sampleRate: int, features: int = 96, windowLength: int = 400, hopLength: int = 160, segmentLength: int = 187) -> None:
+
         #Call the parent's init to store it's values itself.
-        super().__init__(sr)
+        super().__init__(sampleRate)
+
         #Store the rest of the values.
         self.features = features
-        self.winLength = winLength
+        self.windowLength = windowLength
         self.hopLength = hopLength
         self.segmentLength = segmentLength
 
@@ -37,13 +40,13 @@ class neuralPreProcessor(_preprocessor):
             #Data to be spectrogrammed.
             y=audio,
             #Samplerate of the provided audio data.
-            sr=self.sr,
+            sampleRate=self.sampleRate,
             #We use the features parameter to define the number of frequency bins to extract.
             n_mels=self.features,
-            #Fairly obvious, we set the hopLength and winLength to their respective parameters, and match n_fft with winLength.
+            #Fairly obvious, we set the hopLength and windowLength to their respective parameters, and match n_fft with windowLength.
             hop_length=self.hopLength,
-            win_length=self.winLength,
-            n_fft=self.winLength
+            win_length=self.windowLength,
+            n_fft=self.windowLength
         ).T
 
         #Here we split up the mel spectrogram into slice/segments as per the provided segmentLength.
@@ -68,15 +71,18 @@ class neuralPreProcessor(_preprocessor):
         #We then return these segments to be processed by the model.
         return _segments
 
-#Create the traditional pre processor class as an overide of the base class.
+#Create the traditional pre processor class as an overide of the base preprocessor class.
 class traditionalPreProcessor(_preprocessor):
+
     #Set creation parameters. Including the defaults derived from corresponding values used in the original script.
-    def __init__(self, sr: int, features: int = 4, winLength: int = 1024, hopLength: int = 512) -> None:
+    def __init__(self, sampleRate: int = 22050, features: int = 4, windowLength: int = 1024, hopLength: int = 512) -> None:
+
         #Call the parent's init to store it's values itself.
-        super().__init__(sr)
+        super().__init__(sampleRate)
+
         #Store the rest of the values.
         self.features = features
-        self.winLenth = winLength
+        self.winLenth = windowLength
         self.hopLength = hopLength
 
     #Define our own invocation function.
@@ -89,6 +95,7 @@ class traditionalPreProcessor(_preprocessor):
         mel = mfcc(
             #Data to use.
             y=audio,
+            sr=self.sampleRate,
             #Number of mfccs to generate (aka features to extract).
             n_mfcc=self.features,
             #I got these values from Musly. Thanks Musly.
