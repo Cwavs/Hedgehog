@@ -39,7 +39,7 @@ python Hedgehog Search /home/cwavs/csvdir /home/cwavs/csvdir/song.csv -k 100 -f 
 
 - [X] Allow users to select the amount of neighbours chosen.
 - [X] Investigate possible improvements to the neural fingerprinter with better pre-processing.
-- [ ] Generally clean up the code, and maybe consider converting it into an actual module or library rather than scripts.
+- [X] Generally clean up the code, and maybe consider converting it into an actual module or library rather than scripts.
 
 ## Contributing
 
