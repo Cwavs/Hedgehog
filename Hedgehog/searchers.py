@@ -1,4 +1,3 @@
-from voyager import Index, Space
 from numpy import ndarray
 
 #Create a base searcher class.
@@ -34,6 +33,7 @@ class _searcher():
 
 #Create voyager class as an override of the base searcher class.
 class voyager(_searcher):
+    from voyager import Index, Space
 
     #Set creation parameters, adding additional voyager specific parameters.
     def __init__(self, fingerprints: list, names: list, neighbours: int = 10, space: Space = Space.Euclidean, numDimensions: int = 50) -> None:
@@ -57,6 +57,7 @@ class voyager(_searcher):
     #Define a function to build a voyager index.
     def buildIndex(self) -> Index:
         from numpy import stack
+        from voyager import Index
         
         #Create an index containing the space and number of dimensions defined in the class initialisation.
         index = Index(self.space, num_dimensions=self.numDimensions)
@@ -67,9 +68,7 @@ class voyager(_searcher):
 
     def getNeighbours(self, song: ndarray, index: Index) -> tuple:
         #Query the index for the defined number of neighbours.
-        results = index.query(song, k=self.neighbours)
-
-        return results
+        return index.query(song, k=self.neighbours)
 
     def Invoke(self, song: ndarray) -> tuple:
         #Build the index.
@@ -77,6 +76,46 @@ class voyager(_searcher):
         #Query the index we just built.
         songs, dists = self.getNeighbours(song, index)
         #Covert the song IDs into names.
+        songs = self._IDsToNames(songs)
+
+        return (songs, dists)
+
+#Create a class for annoy for comparison with voyager.
+class annoy(voyager):
+    from annoy import AnnoyIndex
+
+    #Set creation parameters, adding additional voyager specific parameters.
+    def __init__(self, fingerprints: list, names: list, neighbours: int = 10, space: str = "euclidean", numDimensions: int = 50, numTrees: int = 1000) -> None:
+        super().__init__(fingerprints, names, neighbours, None, numDimensions)
+
+        self.space = space
+        self.numTrees = numTrees
+
+    def buildIndex(self) -> AnnoyIndex:
+        from annoy import AnnoyIndex
+
+        #Build an annoy index with the specified number of dimensions and space.
+        index = AnnoyIndex(self.numDimensions, self.space)
+
+        #Loop through the fingerprints and add them to the index.
+        for i, fingerprint in enumerate(self.fingerprints):
+            index.add_item(i, fingerprint)
+
+        #Build and return index with the specified number of trees.
+        index.build(self.numTrees)
+
+        return index
+    
+    def getNeighbours(self, song: ndarray, index: AnnoyIndex) -> tuple:
+        #Get the nearest neighbours from the index and return, including the distances.
+        return index.get_nns_by_vector(song, self.neighbours, include_distances=True)
+    
+    def Invoke(self, song: ndarray) -> tuple:
+        #Build the index.
+        index = self.buildIndex()
+        #Query the index we just built.
+        songs, dists = self.getNeighbours(song, index)
+        #Convert the song IDs into names.
         songs = self._IDsToNames(songs)
 
         return (songs, dists)

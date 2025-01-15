@@ -1,5 +1,5 @@
 from numpy import ndarray
-from Hedgehog.preprocessors import _preprocessor
+from preprocessors import _preprocessor
 from preprocessors import _preprocessor
 from pathlib import Path
 

@@ -1,6 +1,6 @@
 from fingerprinters import traditionalFingerprinter, neuralFingerprinter, experimentalNeuralFingerprinter
 from preprocessors import traditionalPreProcessor, neuralPreProcessor, experimentalNeuralPreProcessor
-from searchers import voyager
+from searchers import voyager, annoy
 from argparse import ArgumentParser
 from pathlib import Path
 from librosa import load
@@ -99,13 +99,18 @@ def searchFingerprints(args):
     fingerprint = loadtxt(args.fingerprint, delimiter=",")
 
     #Check if we should use the Neural dimensions or not.
-    if args.fingerprinter == "Neural":
+    if args.fingerprinter == "Neural" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
         searcher = voyager(fingerprints, names, neighbours=args.numNeighbours)
-    else:
+    elif args.fingerprinter == "Traditional" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
         searcher = voyager(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
-
+    elif args.fingerprinter == "Neural" and args.annoy == True:
+        #Create the voyager searcher with the corresponding parameters.
+        searcher = annoy(fingerprints, names, neighbours=args.numNeighbours)
+    elif args.fingerprinter == "Traditional" and args.annoy == True:
+        #Create the voyager searcher with the corresponding parameters.
+        searcher = annoy(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
     #Invoke the searcher with the fingerprint.
     songs, dists = searcher.Invoke(fingerprint)
 
@@ -150,10 +155,11 @@ traditional.set_defaults(func=tradFingerprint)
 search = subparsers.add_parser("Search", help="Search a list of output csv files to find the nearest neighbours to a song.")
 
 #Ditto.
-search.add_argument('csvDir', help="Directory to load the csv files from.", type=Path)
-search.add_argument('fingerprint', help="The CSV Fingerprint for a single song.", type=Path)
-search.add_argument('-k', '--numNeighbours', help="The number of neighbours to return from the query.", type=int, default=10)
-search.add_argument('-f', '--fingerprinter', help="Select which fingerprinter the songs were processed with. This affects the input dimensions.", choices=("Neural", "Traditional"), default="Neural")
+search.add_argument("csvDir", help="Directory to load the csv files from.", type=Path)
+search.add_argument("fingerprint", help="The CSV Fingerprint for a single song.", type=Path)
+search.add_argument("-k", "--numNeighbours", help="The number of neighbours to return from the query.", type=int, default=10)
+search.add_argument("-f", "--fingerprinter", help="Select which fingerprinter the songs were processed with. This affects the input dimensions.", choices=("Neural", "Traditional"), default="Neural")
+search.add_argument("-a", "--annoy", help="Use the alternate annoy indexer.", default=False, type=bool)
 search.set_defaults(func=searchFingerprints)
 
 #Parse args.
