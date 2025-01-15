@@ -1,5 +1,5 @@
-from fingerprinters import traditionalFingerprinter, neuralFingerprinter
-from preprocessors import traditionalPreProcessor, neuralPreProcessor
+from fingerprinters import traditionalFingerprinter, neuralFingerprinter, experimentalNeuralFingerprinter
+from preprocessors import traditionalPreProcessor, neuralPreProcessor, experimentalNeuralPreProcessor
 from searchers import voyager
 from argparse import ArgumentParser
 from pathlib import Path
@@ -68,17 +68,25 @@ def tradFingerprint(args):
 def neuralFingerprint(args):
     #Get a list of all the audio files at audioDir ignoring any with existing CSVs.
     files = getAudioFiles(args.audioDir, args.csvDir, args.format)
+    if args.experimental == True: print("WARNING!! Running In Experimental Mode!!")
 
     #Loop through the files we found.
     for file in files:
         print("Trying to load " + str(file))
         #Load the file in mono at a sample rate of 16kHz with librosa.
         audioData, sampleRate = load(file, sampleRate=16000, mono=True)
-        #Create a new nerual pre-processor.
-        preProcessor = neuralPreProcessor(sampleRate)
-        print("Currently Fingerprinting " + file.name)
-        #Create and invoke the neural fingerprinter.
-        fingerprint = neuralFingerprinter(preProcessor, audioData, args.model).Invoke()
+        if args.experimental == True:
+            #Create a new nerual pre-processor.
+            preProcessor = neuralPreProcessor(sampleRate)
+            print("Currently Fingerprinting " + file.name)
+            #Create and invoke the neural fingerprinter.
+            fingerprint = neuralFingerprinter(preProcessor, audioData, args.model).Invoke()
+        else:
+            #Create a new experimental nerual pre-processor.
+            preProcessor = experimentalNeuralPreProcessor(sampleRate)
+            print("Currently Fingerprinting " + file.name)
+            #Create and invoke the experimental neural fingerprinter.
+            fingerprint = experimentalNeuralFingerprinter(preProcessor, audioData, args.model).Invoke()
         #Save the fingerprint to a csv file.
         saveCSVFile(file, args.csvDir, fingerprint)
     
@@ -126,6 +134,7 @@ neural.add_argument("audioDir", help="Root directory of music library.", type=Pa
 neural.add_argument("-c", "--csvDir", help="Directory to save the csv files to.", type=Path, default=None)
 neural.add_argument("-f", "--format", help="File extension/format of the audio files to read.", type=str, default="flac")
 neural.add_argument("-m", "--model", help="Path to model file.", default="./Music.tflite", type=Path)
+neural.add_argument("-e", "--experimental", help="Enable the experimental neural fingerprinter for testing.", default=False, type=bool)
 neural.set_defaults(func=neuralFingerprint)
 
 #Doing the same thing we did with the neural command with this one.
