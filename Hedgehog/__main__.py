@@ -74,8 +74,8 @@ def neuralFingerprint(args):
     for file in files:
         print("Trying to load " + str(file))
         #Load the file in mono at a sample rate of 16kHz with librosa.
-        audioData, sampleRate = load(file, sampleRate=16000, mono=True)
-        if args.experimental == True:
+        audioData, sampleRate = load(file, sr=16000, mono=True)
+        if args.experimental == False:
             #Create a new nerual pre-processor.
             preProcessor = neuralPreProcessor(sampleRate)
             print("Currently Fingerprinting " + file.name)
@@ -107,7 +107,7 @@ def searchFingerprints(args):
         searcher = voyager(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
     elif args.fingerprinter == "Neural" and args.annoy == True:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = annoy(fingerprints, names, neighbours=args.numNeighbours)
+        searcher = annoy(fingerprints, names, neighbours=args.numNeighbours, numTrees=10000)
     elif args.fingerprinter == "Traditional" and args.annoy == True:
         #Create the voyager searcher with the corresponding parameters.
         searcher = annoy(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
