@@ -1,6 +1,7 @@
 from fingerprinters import traditionalFingerprinter, neuralFingerprinter, experimentalNeuralFingerprinter
 from preprocessors import traditionalPreProcessor, neuralPreProcessor, experimentalNeuralPreProcessor
 from searchers import voyager, annoy
+from voyager import Space
 from argparse import ArgumentParser
 from pathlib import Path
 from librosa import load
@@ -101,13 +102,13 @@ def searchFingerprints(args):
     #Check if we should use the Neural dimensions or not.
     if args.fingerprinter == "Neural" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = voyager(fingerprints, names, neighbours=args.numNeighbours)
+        searcher = voyager(fingerprints, names, neighbours=args.numNeighbours, space=Space.Euclidean)
     elif args.fingerprinter == "Traditional" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
         searcher = voyager(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
     elif args.fingerprinter == "Neural" and args.annoy == True:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = annoy(fingerprints, names, neighbours=args.numNeighbours, numTrees=10000)
+        searcher = annoy(fingerprints, names, neighbours=args.numNeighbours, space="angular")
     elif args.fingerprinter == "Traditional" and args.annoy == True:
         #Create the voyager searcher with the corresponding parameters.
         searcher = annoy(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)

@@ -38,7 +38,7 @@ class neuralPreProcessor(_preprocessor):
             #Data to be spectrogrammed.
             y=audio,
             #Samplerate of the provided audio data.
-            sampleRate=self.sampleRate,
+            sr=self.sampleRate,
             #We use the features parameter to define the number of frequency bins to extract.
             n_mels=self.features,
             #Fairly obvious, we set the hopLength and windowLength to their respective parameters, and match n_fft with windowLength.
@@ -80,21 +80,46 @@ class experimentalNeuralPreProcessor(neuralPreProcessor):
     def Invoke(self, audio: ndarray) -> ndarray:
         #Import some libs needed for processing.
         from librosa.feature import melspectrogram
-        from numpy import stack, newaxis
+        from essentia import log
+        from essentia.standard import Windowing, Spectrum, MelBands, FrameGenerator
+        from essentia import Pool
+        from numpy import stack, newaxis, savetxt
+        from pyloudnorm.meter import Meter
+        from pyloudnorm.normalize import loudness
+
+        log.infoActive = False
+        log.warningActive = False
+        log.errorActive = False
+
+        audio = loudness(audio, Meter(self.sampleRate).integrated_loudness(audio), -18)
+
+        windowOp = Windowing(type="blackmanharris70", size=400, normalized=False)
+        spec = Spectrum()
+        mel = MelBands(numberBands=96, lowFrequencyBound=0, highFrequencyBound=8000, sampleRate=self.sampleRate, normalize="unit_tri", warpingFormula="slaneyMel")
+
+        segments = list()
+
+        for frame in FrameGenerator(audio, frameSize=400, hopSize=160, startFromZero=True, lastFrameToEndOfFile=True, validFrameThresholdRatio=1):
+            fSpec = spec(windowOp(frame))
+            fMel = mel(fSpec)
+            segments.append(fMel)
+
+        _mel = stack(segments, axis=0)
 
         #Generate a melspectrogram and transpose it using a combination of the parameters provided from the parent class and the parameters of this function.
-        _mel = melspectrogram(
+        '''_mel2 = melspectrogram(
             #Data to be spectrogrammed.
             y=audio,
             #Samplerate of the provided audio data.
-            sampleRate=self.sampleRate,
+            sr=self.sampleRate,
             #We use the features parameter to define the number of frequency bins to extract.
             n_mels=self.features,
             #Fairly obvious, we set the hopLength and windowLength to their respective parameters, and match n_fft with windowLength.
             hop_length=self.hopLength,
             win_length=self.windowLength,
             n_fft=self.windowLength
-        ).T
+        ).T'''
+
 
         #Here we split up the mel spectrogram into slice/segments as per the provided segmentLength.
         _segments = []

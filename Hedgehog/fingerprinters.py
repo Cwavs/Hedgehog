@@ -76,7 +76,7 @@ class experimentalNeuralFingerprinter(neuralFingerprinter):
     def Invoke(self) -> ndarray:
         #Import tensorflow for our neural work.
         from tensorflow import lite
-        from numpy import average, sqrt
+        from numpy import average, sqrt, dtypes
 
         #Setup and load Tensorflow model.
         _interpreter = lite.Interpreter(model_path=self.model.as_posix())
@@ -93,7 +93,7 @@ class experimentalNeuralFingerprinter(neuralFingerprinter):
         _interpreter.allocate_tensors()
 
         #Input the result into the model.
-        _interpreter.set_tensor(inputDetails['index'], _preprocessed)
+        _interpreter.set_tensor(inputDetails['index'], _preprocessed.astype(dtypes.Float32DType))
 
         #Actually run the model.
         _interpreter.invoke()
