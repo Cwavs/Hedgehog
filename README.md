@@ -5,7 +5,7 @@ A (bad) attempt at reverse engineering/re-creating [Plex's Sonic Analysis](https
 
 ## Requirements
 
-Only tested on Python 3.12.8
+Only tested on Python 3.11.11
 
 Hedgehog utilises a couple of python modules which can be obtained with pip:
 

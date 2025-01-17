@@ -102,7 +102,7 @@ def searchFingerprints(args):
     #Check if we should use the Neural dimensions or not.
     if args.fingerprinter == "Neural" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = voyager(fingerprints, names, neighbours=args.numNeighbours, space=Space.Euclidean)
+        searcher = voyager(fingerprints, names, neighbours=args.numNeighbours, space=Space.Cosine)
     elif args.fingerprinter == "Traditional" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
         searcher = voyager(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
