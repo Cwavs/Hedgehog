@@ -6,6 +6,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 from librosa import load
 from numpy import savetxt, ndarray, loadtxt
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #Define a function to find all the audio files in a dictionary.
 def getAudioFiles(dir: Path, csvdir: Path, format: str) -> list:
@@ -30,6 +32,7 @@ def saveCSVFile(file: Path, csvdir: Path, fingerprint: ndarray):
     savetxt(
         str(file.with_suffix(".csv")) if not csvdir else f"{csvdir / (file.name.rsplit('.', 1)[0])}.csv",
         fingerprint,
+        fmt="%.18f",
         delimiter=","
     )
 

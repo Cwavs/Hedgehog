@@ -75,31 +75,16 @@ class experimentalNeuralFingerprinter(neuralFingerprinter):
         #Define our own invocation function.
     def Invoke(self) -> ndarray:
         #Import tensorflow for our neural work.
-        from tensorflow import lite
-        from numpy import average, sqrt, dtypes
+        from essentia.standard import TensorflowPredictMusiCNN
+        from numpy import average, sqrt
+        from essentia import log
 
-        #Setup and load Tensorflow model.
-        _interpreter = lite.Interpreter(model_path=self.model.as_posix())
-
-        #Get input and output details
-        inputDetails = _interpreter.get_input_details()[0]
-        outputDetails = _interpreter.get_output_details()[0]
-
-        #Call the selected preprocessor and get the result.
-        _preprocessed = self.Preprocess()
-
-        #Resize the input array to take the newly stacked array. TFlite does not support dynamic inputs, so we have to explictly resize this to match the input array.
-        _interpreter.resize_tensor_input(0, _preprocessed.shape)
-        _interpreter.allocate_tensors()
-
-        #Input the result into the model.
-        _interpreter.set_tensor(inputDetails['index'], _preprocessed.astype(dtypes.Float32DType))
-
-        #Actually run the model.
-        _interpreter.invoke()
+        log.infoActive = False
+        log.warningActive = False
+        log.errorActive = False
 
         #Get the output data from the model.
-        outputData = _interpreter.get_tensor(outputDetails['index'])
+        outputData = TensorflowPredictMusiCNN(graphFilename='msd-musicnn-1.pb')(self.audio)
 
         rms = sqrt((outputData**2).mean(axis=1))
 
