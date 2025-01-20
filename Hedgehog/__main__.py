@@ -1,10 +1,15 @@
-from fingerprinters import traditionalFingerprinter, neuralFingerprinter, experimentalNeuralFingerprinter
-from preprocessors import traditionalPreProcessor, neuralPreProcessor, experimentalNeuralPreProcessor
+from fingerprinters import traditionalFingerprinter, neuralFingerprinter
+from preprocessors import traditionalPreProcessor
 from searchers import voyager, annoy
+from voyager import Space
 from argparse import ArgumentParser
 from pathlib import Path
 from librosa import load
 from numpy import savetxt, ndarray, loadtxt
+import os
+
+#Disable Tensorflow logging.
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #Define a function to find all the audio files in a dictionary.
 def getAudioFiles(dir: Path, csvdir: Path, format: str) -> list:
@@ -29,6 +34,7 @@ def saveCSVFile(file: Path, csvdir: Path, fingerprint: ndarray):
     savetxt(
         str(file.with_suffix(".csv")) if not csvdir else f"{csvdir / (file.name.rsplit('.', 1)[0])}.csv",
         fingerprint,
+        fmt="%.18f",
         delimiter=","
     )
 
@@ -68,25 +74,15 @@ def tradFingerprint(args):
 def neuralFingerprint(args):
     #Get a list of all the audio files at audioDir ignoring any with existing CSVs.
     files = getAudioFiles(args.audioDir, args.csvDir, args.format)
-    if args.experimental == True: print("WARNING!! Running In Experimental Mode!!")
 
     #Loop through the files we found.
     for file in files:
         print("Trying to load " + str(file))
         #Load the file in mono at a sample rate of 16kHz with librosa.
-        audioData, sampleRate = load(file, sr=16000, mono=True)
-        if args.experimental == False:
-            #Create a new nerual pre-processor.
-            preProcessor = neuralPreProcessor(sampleRate)
-            print("Currently Fingerprinting " + file.name)
-            #Create and invoke the neural fingerprinter.
-            fingerprint = neuralFingerprinter(preProcessor, audioData, args.model).Invoke()
-        else:
-            #Create a new experimental nerual pre-processor.
-            preProcessor = experimentalNeuralPreProcessor(sampleRate)
-            print("Currently Fingerprinting " + file.name)
-            #Create and invoke the experimental neural fingerprinter.
-            fingerprint = experimentalNeuralFingerprinter(preProcessor, audioData, args.model).Invoke()
+        audioData = load(file, sr=16000, mono=True)[0]
+        print("Currently Fingerprinting " + file.name)
+        #Create and invoke the neural fingerprinter.
+        fingerprint = neuralFingerprinter(None, audioData, args.model).Invoke()
         #Save the fingerprint to a csv file.
         saveCSVFile(file, args.csvDir, fingerprint)
     
@@ -101,22 +97,22 @@ def searchFingerprints(args):
     #Check if we should use the Neural dimensions or not.
     if args.fingerprinter == "Neural" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = voyager(fingerprints, names, neighbours=args.numNeighbours)
+        searcher = voyager(fingerprints, names, neighbours=args.numNeighbours, space=Space.Cosine)
     elif args.fingerprinter == "Traditional" and args.annoy == False:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = voyager(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
+        searcher = voyager(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours, space=Space.Cosine)
     elif args.fingerprinter == "Neural" and args.annoy == True:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = annoy(fingerprints, names, neighbours=args.numNeighbours, numTrees=10000)
+        searcher = annoy(fingerprints, names, neighbours=args.numNeighbours, space="angular")
     elif args.fingerprinter == "Traditional" and args.annoy == True:
         #Create the voyager searcher with the corresponding parameters.
-        searcher = annoy(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours)
+        searcher = annoy(fingerprints, names, numDimensions=64, neighbours=args.numNeighbours, space="angular")
     #Invoke the searcher with the fingerprint.
     songs, dists = searcher.Invoke(fingerprint)
 
     #Loop throguh the songs and print them out.
     for i, song in enumerate(songs):
-        print(song + " is " + str(dists[i]) + " away from the input.")
+        print(song + " is " + str((1 - dists[i])*100) + " % Similar to the input song.")
     print("Done!")
 
 #Set up argparser.
@@ -138,8 +134,7 @@ neural = type.add_parser("Neural", help="Use the Neural fingerprinter.")
 neural.add_argument("audioDir", help="Root directory of music library.", type=Path)
 neural.add_argument("-c", "--csvDir", help="Directory to save the csv files to.", type=Path, default=None)
 neural.add_argument("-f", "--format", help="File extension/format of the audio files to read.", type=str, default="flac")
-neural.add_argument("-m", "--model", help="Path to model file.", default="./Music.tflite", type=Path)
-neural.add_argument("-e", "--experimental", help="Enable the experimental neural fingerprinter for testing.", default=False, type=bool)
+neural.add_argument("-m", "--model", help="Path to model file.", default="./msd-musicnn-1.pb", type=Path)
 neural.set_defaults(func=neuralFingerprint)
 
 #Doing the same thing we did with the neural command with this one.
@@ -159,7 +154,7 @@ search.add_argument("csvDir", help="Directory to load the csv files from.", type
 search.add_argument("fingerprint", help="The CSV Fingerprint for a single song.", type=Path)
 search.add_argument("-k", "--numNeighbours", help="The number of neighbours to return from the query.", type=int, default=10)
 search.add_argument("-f", "--fingerprinter", help="Select which fingerprinter the songs were processed with. This affects the input dimensions.", choices=("Neural", "Traditional"), default="Neural")
-search.add_argument("-a", "--annoy", help="Use the alternate annoy indexer.", default=False, type=bool)
+search.add_argument("-a", "--annoy", help="Use the alternate annoy indexer.", default=True, type=bool)
 search.set_defaults(func=searchFingerprints)
 
 #Parse args.
