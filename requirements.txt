@@ -1,7 +1,5 @@
 annoy==1.17.3
-essentia==2.1b6.dev1110
+essentia-tensorflow==2.1b6.dev1110
 librosa==0.10.2.post1
 numpy==1.26.4
-pyloudnorm==0.1.1
-tensorflow==2.18.0
 voyager==2.1.0
