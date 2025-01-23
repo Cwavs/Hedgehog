@@ -6,24 +6,28 @@ from argparse import ArgumentParser
 from pathlib import Path
 from librosa import load
 from numpy import savetxt, ndarray, loadtxt
-import os
+from magic import from_file
+from os import environ
 
 #Disable Tensorflow logging.
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #Define a function to find all the audio files in a dictionary.
-def getAudioFiles(dir: Path, csvdir: Path, format: str) -> list:
+def getAudioFiles(dir: Path, csvdir: Path) -> list:
     #Create an empty list of files.
     files = list()
 
-    #Loop through the files in the provided dir of the provided format.
-    for file in dir.rglob(f"*.{format}"):
-        #If no csv exists in csvdir (or the music dir if there isn't a csv dir) then append the file to the list.
-        if Path(str(file.with_suffix(".csv")) if not csvdir else f"{csvdir / (file.name.rsplit('.', 1)[0])}.csv").is_file() == False:
-            files.append(file)
-        #If a csv does exist, we skip the file and print a message about it to the user.
-        else:
-            print("Detected CSV file for " + str(file) + ", assuming already fingerprinted and skipping.")
+    #Loop through the files in the provided dir.
+    for file in dir.rglob("*"):
+        print("Searching for audio files, this may take a while.")
+        #Check if the files are actually files (rglob als returns directories), and audio files.
+        if file.is_file() and from_file(file, mime=True).split("/")[0] == "audio":
+            #If no csv exists in csvdir (or the music dir if there isn't a csv dir) then append the file to the list.
+            if Path(str(file.with_suffix(".csv")) if not csvdir else f"{csvdir / (file.name.rsplit('.', 1)[0])}.csv").is_file() == False:
+                files.append(file)
+            #If a csv does exist, we skip the file and print a message about it to the user.
+            else:
+                print("Detected CSV file for " + str(file) + ", assuming already fingerprinted and skipping.")
     
     #Return the list.
     return files
@@ -73,7 +77,7 @@ def tradFingerprint(args):
 #The function called if neural fingerprinting is chosen.
 def neuralFingerprint(args):
     #Get a list of all the audio files at audioDir ignoring any with existing CSVs.
-    files = getAudioFiles(args.audioDir, args.csvDir, args.format)
+    files = getAudioFiles(args.audioDir, args.csvDir)
 
     #Loop through the files we found.
     for file in files:
@@ -133,7 +137,6 @@ neural = type.add_parser("Neural", help="Use the Neural fingerprinter.")
 #Set up the arguments for the aformentioned subcommand.
 neural.add_argument("audioDir", help="Root directory of music library.", type=Path)
 neural.add_argument("-c", "--csvDir", help="Directory to save the csv files to.", type=Path, default=None)
-neural.add_argument("-f", "--format", help="File extension/format of the audio files to read.", type=str, default="flac")
 neural.add_argument("-m", "--model", help="Path to model file.", default="./msd-musicnn-1.pb", type=Path)
 neural.set_defaults(func=neuralFingerprint)
 
@@ -143,7 +146,6 @@ traditional = type.add_parser("Traditional", help="Use the Traditional fingerpri
 #Ditto.
 traditional.add_argument("audioDir", help="Root directory of music library.", type=Path)
 traditional.add_argument("-c", "--csvDir", help="Directory to save the csv files to.", type=Path, default=None)
-traditional.add_argument("-f", "--format", help="File extension/format of the audio files to read.", type=str, default="flac")
 traditional.set_defaults(func=tradFingerprint)
 
 #Create a search subcommand. Likewise as with the fingerprinters. I just forgot that I had to convert this as well, woops.
