@@ -1,7 +1,7 @@
 from numpy import ndarray
 
 #Create a base searcher class.
-class _searcher():
+class _indexer():
     
     #Set creation parameters.
     def __init__(self, fingerprints: list, names: list, neighbours: int = 10) -> None:
@@ -32,7 +32,7 @@ class _searcher():
         return (songs, dists)
 
 #Create voyager class as an override of the base searcher class.
-class voyager(_searcher):
+class voyager(_indexer):
     from voyager import Index, Space
 
     #Set creation parameters, adding additional voyager specific parameters.
