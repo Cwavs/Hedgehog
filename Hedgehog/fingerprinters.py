@@ -25,7 +25,7 @@ class _fingerprinter:
 #Create the neural fingerprinter class as an overide of the base fingerprinter class.
 class neuralFingerprinter(_fingerprinter):
     
-    #Set creation parameters. Including the defaults derived from corresponding values used in the original script.
+    #Set creation parameters.
     def __init__(self, preprocessor: _preprocessor, audio: ndarray, model: Path) -> None:
         #Call the parent's init to store it's values itself.
         super().__init__(preprocessor, audio)
