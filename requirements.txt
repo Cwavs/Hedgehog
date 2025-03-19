@@ -3,3 +3,4 @@ essentia-tensorflow==2.1b6.dev1110
 librosa==0.10.2.post1
 numpy==1.26.4
 voyager==2.1.0
+python-magic==0.4.27
