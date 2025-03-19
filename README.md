@@ -40,7 +40,7 @@ We also currently only support finding the nearest neighbours to one song. I wou
 The below command would load all CSVs in the directory /home/cwavs/csvdir and construct an annoy Index for the Neural fingerprinter. It then loads the CSV "song.csv" and finds the 100 closest songs too it.
 
 ```bash
-python Hedgehog Search /home/cwavs/csvdir /home/cwavs/csvdir/song.csv -k 100 -f Neural
+python Hedgehog Neighbours /home/cwavs/csvdir /home/cwavs/csvdir/song.csv -k 100 -f Neural
 ```
 
 ## Contributing
